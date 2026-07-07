@@ -1,0 +1,44 @@
+{
+  "name": "antdv-next-pro",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc -b && vite build",
+    "build:staging": "vue-tsc -b && vite build --mode staging",
+    "preview": "vite preview",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "type-check": "vue-tsc --noEmit"
+  },
+  "dependencies": {
+    "antdv-next": "^1.0.5",
+    "@antdv-next/icons": "^1.0.1",
+    "vue": "^3.5.13",
+    "vue-router": "^4.5.1",
+    "pinia": "^3.0.4",
+    "axios": "^1.9.0",
+    "d3": "^7.9.0",
+    "topojson-client": "^3.1.0",
+    "dayjs": "^1.11.13",
+    "nprogress": "^0.2.0",
+    "pinia-plugin-persistedstate": "^4.3.0",
+    "vue-i18n": "^11.1.0",
+    "@antv/g2": "^5.2.0"
+  },
+  "devDependencies": {
+    "@antdv-next/auto-import-resolver": "^1.0.1",
+    "@vitejs/plugin-vue": "^5.2.4",
+    "@vitejs/plugin-vue-jsx": "^4.1.2",
+    "typescript": "~5.8.3",
+    "unplugin-auto-import": "^19.2.0",
+    "unplugin-vue-components": "^28.5.0",
+    "vite": "^6.3.5",
+    "vue-tsc": "^2.2.8",
+    "@types/nprogress": "^0.2.3",
+    "@types/d3": "^7.4.3",
+    "@types/topojson-client": "^3.1.5",
+    "msw": "^2.8.4"
+  }
+}
