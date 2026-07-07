@@ -25,6 +25,7 @@ const themeConfig = computed(() => {
     token: {
       colorPrimary: appStore.primaryColor,
       borderRadius: 6,
+      fontFamily: 'AlibabaSans, sans-serif',
     },
     algorithm: algorithms,
     zeroRuntime: true,
@@ -38,7 +39,7 @@ const antdLocale = computed(() => {
 </script>
 
 <template>
-  <a-config-provider :theme="themeConfig" :locale="antdLocale">
+  <a-config-provider :theme="themeConfig" :locale="antdLocale" variant="filled">
     <a-app>
       <router-view />
       <SettingDrawer />

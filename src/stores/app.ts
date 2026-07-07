@@ -36,7 +36,7 @@ export const useAppStore = defineStore('app', {
     fixedHeader: false,
     fixedSider: true,
     showFooter: true,
-    showTabs: true,
+    showTabs: false,
     colorWeak: false,
     contentWidth: 'fluid',
     compactMode: false,

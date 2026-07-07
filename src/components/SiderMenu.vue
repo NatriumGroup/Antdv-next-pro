@@ -10,6 +10,7 @@ import {
   SmileOutlined,
   CrownOutlined,
   UserOutlined,
+  RobotOutlined,
 } from '@antdv-next/icons'
 import type { ItemType } from 'antdv-next'
 import type { RouteRecordRaw } from 'vue-router'
@@ -44,6 +45,7 @@ const iconComponents: Record<string, any> = {
   SmileOutlined,
   CrownOutlined,
   UserOutlined,
+  RobotOutlined,
 }
 
 function renderIcon(name: string | undefined) {

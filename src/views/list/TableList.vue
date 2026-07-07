@@ -1,10 +1,17 @@
 <script setup lang="ts">
-import { PlusOutlined, ReloadOutlined, SearchOutlined } from '@antdv-next/icons'
+import { PlusOutlined, ReloadOutlined, SearchOutlined, DownOutlined, UpOutlined } from '@antdv-next/icons'
 import { App } from 'antdv-next'
 
 const { message, modal } = App.useApp()
 
-const searchForm = reactive({ name: '', status: undefined as string | undefined })
+// ── 搜索表单 ──
+const searchForm = reactive({
+  name: '',
+  desc: '',
+  status: undefined as string | undefined,
+  updatedAt: null as any,
+})
+const searchExpand = ref(false)
 const loading = ref(false)
 
 const statusMap: Record<string, { text: string; status: string }> = {
@@ -34,25 +41,53 @@ const dataSource = ref(
 
 const pagination = reactive({ current: 1, pageSize: 10, total: 30, showSizeChanger: true, showQuickJumper: true, showTotal: (t: number) => `共 ${t} 条` })
 
-// 行选择
+// ── 行选择 ──
 const selectedRowKeys = ref<string[]>([])
 const rowSelection = computed(() => ({
   selectedRowKeys: selectedRowKeys.value,
   onChange: (keys: string[]) => { selectedRowKeys.value = keys },
 }))
 
-// 新建弹窗
+// ── 新建弹窗 ──
 const createVisible = ref(false)
 const createForm = reactive({ name: '', desc: '' })
 function handleCreate() { createForm.name = ''; createForm.desc = ''; createVisible.value = true }
 function handleCreateOk() { message.success('添加成功'); createVisible.value = false }
 
-// 详情抽屉
+// ── 配置弹窗（分步表单） ──
+const configVisible = ref(false)
+const configStep = ref(0)
+const configForm = reactive({
+  name: '', desc: '',
+  target: '0', template: '0', type: '0',
+  time: null as any, frequency: 'month',
+})
+
+function showConfig(record: any) {
+  configForm.name = record.name
+  configForm.desc = record.desc
+  configForm.target = '0'
+  configForm.template = '0'
+  configForm.type = '0'
+  configForm.time = null
+  configForm.frequency = 'month'
+  configStep.value = 0
+  configVisible.value = true
+}
+
+function configNext() { configStep.value++ }
+function configPrev() { configStep.value-- }
+function configSubmit() {
+  message.success('配置成功')
+  configVisible.value = false
+}
+
+// ── 详情抽屉 ──
 const detailVisible = ref(false)
 const currentRow = ref<any>(null)
 function showDetail(record: any) { currentRow.value = record; detailVisible.value = true }
 
-// 批量删除
+// ── 批量操作 ──
 function handleBatchDelete() {
   modal.confirm({
     title: `确定删除选中的 ${selectedRowKeys.value.length} 项吗？`,
@@ -65,31 +100,70 @@ function handleBatchDelete() {
 }
 
 function handleSearch() { message.info('搜索') }
-function handleReset() { searchForm.name = ''; searchForm.status = undefined }
+function handleReset() {
+  searchForm.name = ''; searchForm.desc = ''
+  searchForm.status = undefined; searchForm.updatedAt = null
+}
 </script>
 
 <template>
-  <div>
+  <PageContainer>
     <!-- 搜索栏 -->
     <a-card variant="borderless" style="margin-bottom: 24px">
       <a-form layout="inline" :model="searchForm">
-        <a-form-item label="规则名称">
-          <a-input v-model:value="searchForm.name" placeholder="请输入" allow-clear />
-        </a-form-item>
-        <a-form-item label="状态">
-          <a-select v-model:value="searchForm.status" placeholder="请选择" allow-clear style="width: 120px">
-            <a-select-option value="0">关闭</a-select-option>
-            <a-select-option value="1">运行中</a-select-option>
-            <a-select-option value="2">已上线</a-select-option>
-            <a-select-option value="3">异常</a-select-option>
-          </a-select>
-        </a-form-item>
-        <a-form-item>
-          <a-space>
-            <a-button type="primary" @click="handleSearch"><template #icon><SearchOutlined /></template>查询</a-button>
-            <a-button @click="handleReset"><template #icon><ReloadOutlined /></template>重置</a-button>
-          </a-space>
-        </a-form-item>
+        <a-row :gutter="16" style="width: 100%">
+          <a-col :span="8">
+            <a-form-item label="规则名称" style="width: 100%">
+              <a-input v-model:value="searchForm.name" placeholder="请输入" allow-clear />
+            </a-form-item>
+          </a-col>
+          <a-col :span="8">
+            <a-form-item label="描述" style="width: 100%">
+              <a-input v-model:value="searchForm.desc" placeholder="请输入" allow-clear />
+            </a-form-item>
+          </a-col>
+          <a-col :span="8" style="text-align: right" v-if="!searchExpand">
+            <a-form-item>
+              <a-space>
+                <a-button type="primary" @click="handleSearch"><template #icon><SearchOutlined /></template>查询</a-button>
+                <a-button @click="handleReset"><template #icon><ReloadOutlined /></template>重置</a-button>
+                <a style="font-size: 12px" @click="searchExpand = !searchExpand">
+                  展开
+                  <DownOutlined />
+                </a>
+              </a-space>
+            </a-form-item>
+          </a-col>
+          <template v-if="searchExpand">
+            <a-col :span="8">
+              <a-form-item label="上次调度时间" style="width: 100%">
+                <a-date-picker v-model:value="searchForm.updatedAt" show-time style="width: 100%" />
+              </a-form-item>
+            </a-col>
+            <a-col :span="8">
+              <a-form-item label="状态" style="width: 100%">
+                <a-select v-model:value="searchForm.status" placeholder="请选择" allow-clear>
+                  <a-select-option value="0">关闭</a-select-option>
+                  <a-select-option value="1">运行中</a-select-option>
+                  <a-select-option value="2">已上线</a-select-option>
+                  <a-select-option value="3">异常</a-select-option>
+                </a-select>
+              </a-form-item>
+            </a-col>
+            <a-col :span="8" style="text-align: right">
+              <a-form-item>
+                <a-space>
+                  <a-button type="primary" @click="handleSearch"><template #icon><SearchOutlined /></template>查询</a-button>
+                  <a-button @click="handleReset"><template #icon><ReloadOutlined /></template>重置</a-button>
+                  <a style="font-size: 12px" @click="searchExpand = false">
+                    收起
+                    <UpOutlined />
+                  </a>
+                </a-space>
+              </a-form-item>
+            </a-col>
+          </template>
+        </a-row>
       </a-form>
     </a-card>
 
@@ -114,7 +188,7 @@ function handleReset() { searchForm.name = ''; searchForm.status = undefined }
           </template>
           <template v-if="column.key === 'action'">
             <a-space>
-              <a>配置</a>
+              <a @click="showConfig(record)">配置</a>
               <a-divider type="vertical" />
               <a>订阅警报</a>
             </a-space>
@@ -124,9 +198,14 @@ function handleReset() { searchForm.name = ''; searchForm.status = undefined }
 
       <!-- 批量操作 -->
       <div v-if="selectedRowKeys.length > 0" class="footer-toolbar">
-        <span style="margin-right: 16px">已选择 <a style="font-weight: 600">{{ selectedRowKeys.length }}</a> 项</span>
-        <a-button type="primary" danger @click="handleBatchDelete">批量删除</a-button>
-        <a-button style="margin-left: 8px">批量审批</a-button>
+        <div style="flex: 1">
+          已选择 <a style="font-weight: 600">{{ selectedRowKeys.length }}</a> 项&nbsp;&nbsp;
+          <span>服务调用次数总计 {{ dataSource.filter(d => selectedRowKeys.includes(d.key)).reduce((sum, d) => sum + d.callNo, 0) }} 万</span>
+        </div>
+        <a-space>
+          <a-button @click="handleBatchDelete">批量删除</a-button>
+          <a-button type="primary">批量审批</a-button>
+        </a-space>
       </div>
     </a-card>
 
@@ -138,11 +217,84 @@ function handleReset() { searchForm.name = ''; searchForm.status = undefined }
       </a-form>
     </a-modal>
 
+    <!-- 配置弹窗（分步表单） -->
+    <a-modal v-model:open="configVisible" title="规则配置" :width="640" :footer="null">
+      <div style="padding: 16px 0">
+        <a-steps
+          :current="configStep"
+          size="small"
+          :items="[{ title: '基本信息' }, { title: '配置规则属性' }, { title: '设定调度周期' }]"
+          style="margin-bottom: 32px"
+        />
+
+        <!-- Step 1: 基本信息 -->
+        <div v-show="configStep === 0">
+          <a-form :label-col="{ span: 5 }" :wrapper-col="{ span: 19 }">
+            <a-form-item label="规则名称" :rules="[{ required: true }]">
+              <a-input v-model:value="configForm.name" placeholder="请输入规则名称" style="width: 328px" />
+            </a-form-item>
+            <a-form-item label="规则描述" :rules="[{ required: true, min: 5 }]">
+              <a-textarea v-model:value="configForm.desc" placeholder="请输入至少五个字符" :rows="4" style="width: 328px" />
+            </a-form-item>
+          </a-form>
+          <div style="text-align: right; padding-top: 16px">
+            <a-button type="primary" @click="configNext">下一步</a-button>
+          </div>
+        </div>
+
+        <!-- Step 2: 配置规则属性 -->
+        <div v-show="configStep === 1">
+          <a-form :label-col="{ span: 5 }" :wrapper-col="{ span: 19 }">
+            <a-form-item label="监控对象">
+              <a-select v-model:value="configForm.target" style="width: 328px">
+                <a-select-option value="0">表一</a-select-option>
+                <a-select-option value="1">表二</a-select-option>
+              </a-select>
+            </a-form-item>
+            <a-form-item label="规则模板">
+              <a-select v-model:value="configForm.template" style="width: 328px">
+                <a-select-option value="0">规则模板一</a-select-option>
+                <a-select-option value="1">规则模板二</a-select-option>
+              </a-select>
+            </a-form-item>
+            <a-form-item label="规则类型">
+              <a-radio-group v-model:value="configForm.type">
+                <a-radio value="0">强</a-radio>
+                <a-radio value="1">弱</a-radio>
+              </a-radio-group>
+            </a-form-item>
+          </a-form>
+          <div style="display: flex; justify-content: space-between; padding-top: 16px">
+            <a-button @click="configPrev">上一步</a-button>
+            <a-button type="primary" @click="configNext">下一步</a-button>
+          </div>
+        </div>
+
+        <!-- Step 3: 设定调度周期 -->
+        <div v-show="configStep === 2">
+          <a-form :label-col="{ span: 5 }" :wrapper-col="{ span: 19 }">
+            <a-form-item label="开始时间" :rules="[{ required: true }]">
+              <a-date-picker v-model:value="configForm.time" show-time style="width: 328px" />
+            </a-form-item>
+            <a-form-item label="调度周期">
+              <a-select v-model:value="configForm.frequency" style="width: 328px">
+                <a-select-option value="month">月</a-select-option>
+                <a-select-option value="week">周</a-select-option>
+              </a-select>
+            </a-form-item>
+          </a-form>
+          <div style="display: flex; justify-content: space-between; padding-top: 16px">
+            <a-button @click="configPrev">上一步</a-button>
+            <a-button type="primary" @click="configSubmit">完成</a-button>
+          </div>
+        </div>
+      </div>
+    </a-modal>
+
     <!-- 详情抽屉 -->
-    <a-drawer :open="detailVisible" :size="600" placement="right" :closable="true" @close="detailVisible = false">
-      <template #title>规则详情</template>
+    <a-drawer :open="detailVisible" :size="600" placement="right" :closable="false" @close="detailVisible = false">
       <template v-if="currentRow">
-        <a-descriptions :column="2" bordered>
+        <a-descriptions :column="2" :title="currentRow.name">
           <a-descriptions-item label="规则名称">{{ currentRow.name }}</a-descriptions-item>
           <a-descriptions-item label="描述">{{ currentRow.desc }}</a-descriptions-item>
           <a-descriptions-item label="服务调用次数">{{ currentRow.callNo }} 万</a-descriptions-item>
@@ -153,7 +305,7 @@ function handleReset() { searchForm.name = ''; searchForm.status = undefined }
         </a-descriptions>
       </template>
     </a-drawer>
-  </div>
+  </PageContainer>
 </template>
 
 <style scoped>

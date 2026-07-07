@@ -66,11 +66,7 @@ function handleSubmit() { message.success('提交成功') }
 </script>
 
 <template>
-  <div>
-    <div style="margin-bottom: 16px; color: rgba(0,0,0,0.45); font-size: 14px">
-      高级表单常见于一次性输入和提交大批量数据的场景。
-    </div>
-
+  <PageContainer content="高级表单常见于一次性输入和提交大批量数据的场景。">
     <a-form :model="formState" layout="vertical">
       <!-- 仓库管理 -->
       <a-card title="仓库管理" variant="borderless" style="margin-bottom: 24px">
@@ -82,7 +78,11 @@ function handleSubmit() { message.success('提交成功') }
           </a-col>
           <a-col :xl="{ span: 6, offset: 2 }" :lg="8" :md="12" :sm="24">
             <a-form-item label="仓库域名" name="url" :rules="[{ required: true, message: '请输入' }]">
-              <a-input v-model:value="formState.url" addon-before="http://" addon-after=".com" placeholder="请输入" />
+              <a-space-compact class="url-group" style="width: 100%">
+                <a-space-addon variant="filled">http://</a-space-addon>
+                <a-input v-model:value="formState.url" placeholder="请输入" />
+                <a-space-addon variant="filled">.com</a-space-addon>
+              </a-space-compact>
             </a-form-item>
           </a-col>
           <a-col :xl="{ span: 8, offset: 2 }" :lg="10" :md="24" :sm="24">
@@ -179,10 +179,11 @@ function handleSubmit() { message.success('提交成功') }
     <!-- Footer Toolbar -->
     <div class="footer-toolbar">
       <a-space>
+        <a-button @click="Object.assign(formState, { name: '', url: '', owner: undefined, approver: undefined, dateRange: null, type: undefined, name2: '', url2: '', owner2: undefined, approver2: undefined, dateRange2: null, type2: undefined })">重置</a-button>
         <a-button type="primary" @click="handleSubmit">提交</a-button>
       </a-space>
     </div>
-  </div>
+  </PageContainer>
 </template>
 
 <style scoped>
@@ -193,5 +194,21 @@ function handleSubmit() { message.success('提交成功') }
   background: var(--ant-color-bg-container, #fff);
   border-top: 1px solid rgba(5,5,5,0.06);
   box-shadow: 0 -6px 16px rgba(0,0,0,0.08);
+}
+
+/* 仓库域名 addon 无缝拼接 */
+.url-group :deep(> *),
+.url-group :deep(> * > *) {
+  border-radius: 0 !important;
+}
+.url-group :deep(> *:first-child),
+.url-group :deep(> *:first-child > *) {
+  border-start-start-radius: 6px !important;
+  border-end-start-radius: 6px !important;
+}
+.url-group :deep(> *:last-child),
+.url-group :deep(> *:last-child > *) {
+  border-start-end-radius: 6px !important;
+  border-end-end-radius: 6px !important;
 }
 </style>

@@ -148,6 +148,33 @@ export const asyncRoutes: RouteRecordRaw[] = [
         meta: { title: '列表页', icon: 'TableOutlined' },
         children: [
           {
+            path: 'search',
+            name: 'SearchList',
+            redirect: '/list/search/articles',
+            component: () => import('@/views/list/SearchList.vue'),
+            meta: { title: '搜索列表' },
+            children: [
+              {
+                path: 'articles',
+                name: 'SearchArticles',
+                component: () => import('@/views/list/search/Articles.vue'),
+                meta: { title: '搜索列表（文章）', hideInMenu: true },
+              },
+              {
+                path: 'projects',
+                name: 'SearchProjects',
+                component: () => import('@/views/list/search/Projects.vue'),
+                meta: { title: '搜索列表（项目）', hideInMenu: true },
+              },
+              {
+                path: 'applications',
+                name: 'SearchApplications',
+                component: () => import('@/views/list/search/Applications.vue'),
+                meta: { title: '搜索列表（应用）', hideInMenu: true },
+              },
+            ],
+          },
+          {
             path: 'table-list',
             name: 'TableList',
             component: () => import('@/views/list/TableList.vue'),
@@ -256,6 +283,13 @@ export const asyncRoutes: RouteRecordRaw[] = [
             meta: { title: '个人设置' },
           },
         ],
+      },
+      // Chatbot
+      {
+        path: 'chatbot',
+        name: 'Chatbot',
+        component: () => import('@/views/chatbot/index.vue'),
+        meta: { title: 'AI 助手', icon: 'RobotOutlined' },
       },
     ],
   },

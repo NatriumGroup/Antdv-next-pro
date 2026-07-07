@@ -1,10 +1,16 @@
 <script setup lang="ts">
 import { App } from 'antdv-next'
-import { UploadOutlined } from '@antdv-next/icons'
+import {
+  UploadOutlined,
+  TaobaoOutlined,
+  AlipayOutlined,
+  DingdingOutlined,
+} from '@antdv-next/icons'
 
 const { message } = App.useApp()
 
 const menuKey = ref('base')
+const selectedKeys = computed(() => [menuKey.value])
 const menuItems = [
   { key: 'base', label: '基本设置' },
   { key: 'security', label: '安全设置' },
@@ -15,7 +21,7 @@ const menuItems = [
 // Base form
 const baseForm = reactive({
   email: 'antdesign@alipay.com',
-  name: '吴彦祖',
+  name: 'Serati Ma',
   profile: '海纳百川，有容乃大',
   country: 'China',
   province: '浙江省',
@@ -37,14 +43,14 @@ const securityItems = [
 
 // Binding
 const bindingItems = [
-  { title: '绑定淘宝', description: '当前未绑定淘宝账号', action: '绑定' },
-  { title: '绑定支付宝', description: '当前未绑定支付宝账号', action: '绑定' },
-  { title: '绑定钉钉', description: '当前未绑定钉钉账号', action: '绑定' },
+  { title: '绑定淘宝', description: '当前未绑定淘宝账号', action: '绑定', iconType: 'taobao', color: '#ff4000' },
+  { title: '绑定支付宝', description: '当前未绑定支付宝账号', action: '绑定', iconType: 'alipay', color: '#2eabff' },
+  { title: '绑定钉钉', description: '当前未绑定钉钉账号', action: '绑定', iconType: 'dingding', color: '#2eabff' },
 ]
 
 // Notification
 const notifications = reactive([
-  { title: '账户密码', description: '其他用户的消息将以站内信的形式通知', checked: true },
+  { title: '用户消息', description: '其他用户的消息将以站内信的形式通知', checked: true },
   { title: '系统消息', description: '系统消息将以站内信的形式通知', checked: true },
   { title: '待办任务', description: '待办任务将以站内信的形式通知', checked: true },
 ])
@@ -55,11 +61,7 @@ const notifications = reactive([
     <div style="display: flex; gap: 48px">
       <!-- 左：菜单 -->
       <div style="width: 220px; flex-shrink: 0; border-right: 1px solid rgba(5,5,5,0.06)">
-        <a-menu v-model:selectedKeys="[menuKey]" mode="inline" style="border: none">
-          <a-menu-item v-for="item in menuItems" :key="item.key" @click="menuKey = item.key">
-            {{ item.label }}
-          </a-menu-item>
-        </a-menu>
+        <a-menu :selected-keys="selectedKeys" :items="menuItems" mode="inline" style="border: none" @click="({ key }: { key: string }) => menuKey = key" />
       </div>
 
       <!-- 右：内容 -->
@@ -96,42 +98,80 @@ const notifications = reactive([
         <!-- 安全设置 -->
         <div v-if="menuKey === 'security'">
           <h3 style="margin: 0 0 24px; font-size: 20px; font-weight: 500">安全设置</h3>
-          <a-list :data-source="securityItems" item-layout="horizontal">
-            <template #renderItem="{ item }">
-              <a-list-item>
-                <template #actions><a>{{ item.action }}</a></template>
-                <a-list-item-meta :title="item.title" :description="item.description" />
-              </a-list-item>
-            </template>
-          </a-list>
+          <div class="settings-list">
+            <div v-for="(item, i) in securityItems" :key="i" class="settings-list-item">
+              <div class="settings-list-meta">
+                <div class="settings-list-title">{{ item.title }}</div>
+                <div class="settings-list-desc">{{ item.description }}</div>
+              </div>
+              <a-button type="link">{{ item.action }}</a-button>
+            </div>
+          </div>
         </div>
 
         <!-- 账号绑定 -->
         <div v-if="menuKey === 'binding'">
           <h3 style="margin: 0 0 24px; font-size: 20px; font-weight: 500">账号绑定</h3>
-          <a-list :data-source="bindingItems" item-layout="horizontal">
-            <template #renderItem="{ item }">
-              <a-list-item>
-                <template #actions><a>{{ item.action }}</a></template>
-                <a-list-item-meta :title="item.title" :description="item.description" />
-              </a-list-item>
-            </template>
-          </a-list>
+          <div class="settings-list">
+            <div v-for="(item, i) in bindingItems" :key="i" class="settings-list-item">
+              <div style="display: flex; align-items: center; gap: 16px; flex: 1; min-width: 0">
+                <TaobaoOutlined v-if="item.iconType === 'taobao'" :style="{ fontSize: '48px', color: item.color }" />
+                <AlipayOutlined v-if="item.iconType === 'alipay'" :style="{ fontSize: '48px', color: item.color }" />
+                <DingdingOutlined v-if="item.iconType === 'dingding'" :style="{ fontSize: '48px', color: item.color }" />
+                <div class="settings-list-meta">
+                  <div class="settings-list-title">{{ item.title }}</div>
+                  <div class="settings-list-desc">{{ item.description }}</div>
+                </div>
+              </div>
+              <a-button type="link">{{ item.action }}</a-button>
+            </div>
+          </div>
         </div>
 
         <!-- 新消息通知 -->
         <div v-if="menuKey === 'notification'">
           <h3 style="margin: 0 0 24px; font-size: 20px; font-weight: 500">新消息通知</h3>
-          <a-list :data-source="notifications" item-layout="horizontal">
-            <template #renderItem="{ item }">
-              <a-list-item>
-                <template #actions><a-switch v-model:checked="item.checked" /></template>
-                <a-list-item-meta :title="item.title" :description="item.description" />
-              </a-list-item>
-            </template>
-          </a-list>
+          <div class="settings-list">
+            <div v-for="(item, i) in notifications" :key="i" class="settings-list-item">
+              <div class="settings-list-meta">
+                <div class="settings-list-title">{{ item.title }}</div>
+                <div class="settings-list-desc">{{ item.description }}</div>
+              </div>
+              <a-switch v-model:checked="item.checked" checked-children="开" un-checked-children="关" />
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </a-card>
 </template>
+
+<style scoped>
+.settings-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 0;
+  border-bottom: 1px solid rgba(5, 5, 5, 0.06);
+}
+
+.settings-list-item:last-child {
+  border-bottom: none;
+}
+
+.settings-list-meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.settings-list-title {
+  margin-bottom: 4px;
+  color: rgba(0, 0, 0, 0.88);
+  font-size: 14px;
+}
+
+.settings-list-desc {
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 14px;
+}
+</style>

@@ -28,17 +28,18 @@ function handleAgain() {
 </script>
 
 <template>
-  <div>
-    <div style="margin-bottom: 16px; color: rgba(0,0,0,0.45); font-size: 14px">
-      将一个冗长或用户不熟悉的表单任务分成多个步骤，指导用户完成。
-    </div>
+  <PageContainer content="将一个冗长或用户不熟悉的表单任务分成多个步骤，指导用户完成。">
     <a-card variant="borderless">
       <div style="max-width: 740px; margin: 0 auto">
-        <a-steps :current="current" style="margin-bottom: 40px">
-          <a-step title="填写转账信息" />
-          <a-step title="确认转账信息" />
-          <a-step title="完成" />
-        </a-steps>
+        <a-steps
+          :current="current"
+          :items="[
+            { title: '填写转账信息' },
+            { title: '确认转账信息' },
+            { title: '完成' },
+          ]"
+          style="margin-bottom: 40px"
+        />
 
         <!-- Step 1: 填写转账信息 -->
         <div v-show="current === 0">
@@ -122,5 +123,5 @@ function handleAgain() {
         <p style="color: rgba(0,0,0,0.45)">如果需要，这里可以放一些关于产品的常见问题说明。如果需要，这里可以放一些关于产品的常见问题说明。如果需要，这里可以放一些关于产品的常见问题说明。</p>
       </div>
     </a-card>
-  </div>
+  </PageContainer>
 </template>

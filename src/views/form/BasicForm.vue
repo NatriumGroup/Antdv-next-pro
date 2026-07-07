@@ -21,10 +21,7 @@ function handleSubmit() {
 </script>
 
 <template>
-  <div>
-    <div style="margin-bottom: 16px; color: rgba(0,0,0,0.45); font-size: 14px">
-      表单页用于向用户收集或验证信息，基础表单常见于数据项较少的表单场景。
-    </div>
+  <PageContainer content="表单页用于向用户收集或验证信息，基础表单常见于数据项较少的表单场景。">
     <a-card variant="borderless">
       <a-form
         :model="formState"
@@ -93,7 +90,7 @@ function handleSubmit() {
           </a-select>
         </a-form-item>
 
-        <a-form-item>
+        <a-form-item style="margin-top: 32px">
           <a-space>
             <a-button type="primary" html-type="submit">提交</a-button>
             <a-button>保存</a-button>
@@ -101,5 +98,5 @@ function handleSubmit() {
         </a-form-item>
       </a-form>
     </a-card>
-  </div>
+  </PageContainer>
 </template>

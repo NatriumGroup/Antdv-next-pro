@@ -34,7 +34,7 @@ const progressData = [
 </script>
 
 <template>
-  <div>
+  <PageContainer>
     <a-card variant="borderless">
       <a-descriptions title="退款申请" :column="2">
         <a-descriptions-item label="取货单号">1000000000</a-descriptions-item>
@@ -76,5 +76,5 @@ const progressData = [
         </template>
       </a-table>
     </a-card>
-  </div>
+  </PageContainer>
 </template>

@@ -7,18 +7,17 @@ import {
   SettingOutlined,
   LogoutOutlined,
   QuestionCircleOutlined,
-  FullscreenOutlined,
-  FullscreenExitOutlined,
+  GlobalOutlined,
+  SkinOutlined,
   LeftOutlined,
   RightOutlined,
 } from '@antdv-next/icons'
 import SiderMenu from '@/components/SiderMenu.vue'
 import TabBar from '@/components/TabBar.vue'
-import HeaderSearch from '@/components/HeaderSearch.vue'
-import NoticeIcon from '@/components/NoticeIcon.vue'
 import { useAppStore } from '@/stores/app'
 import { useUserStore } from '@/stores/user'
 import { defaultSettings } from '@/config/defaultSettings'
+import { setLocale, getLocale, type LocaleType } from '@/locales'
 
 const router = useRouter()
 const route = useRoute()
@@ -85,13 +84,35 @@ function toggleFullscreen() {
   }
 }
 
-// ── 用户操作 ──
+// ── 语言切换 ──
+const currentLocale = ref<LocaleType>(getLocale())
+const localeMenuItems = [
+  { key: 'zh-CN', label: '🇨🇳 简体中文' },
+  { key: 'en-US', label: '🇺🇸 English' },
+]
+
+function handleLocaleClick({ key }: { key: string }) {
+  currentLocale.value = key as LocaleType
+  setLocale(key as LocaleType)
+}
+
+// ── 用户菜单 ──
+const userMenuItems = [
+  { key: 'settings', icon: SettingOutlined, label: '个人设置' },
+  { key: 'theme', icon: SkinOutlined, label: '主题设置' },
+  { type: 'divider' },
+  { key: 'logout', icon: LogoutOutlined, label: '退出登录' },
+]
+
 function handleUserMenuClick({ key }: { key: string }) {
   if (key === 'logout') {
     userStore.logout()
     router.push('/user/login')
   } else if (key === 'settings') {
     router.push('/account/settings')
+  } else if (key === 'theme') {
+    const btn = document.querySelector('.setting-btn') as HTMLElement
+    btn?.click()
   }
 }
 
@@ -278,41 +299,27 @@ const LogoBlock = {
           />
         </div>
 
-        <!-- Right actions -->
-        <div :style="{ display: 'flex', alignItems: 'center', paddingRight: '12px', gap: '2px', flexShrink: 0, color: (appStore.layoutMode === 'mix' || appStore.layoutMode === 'top') ? 'rgba(255,255,255,0.85)' : undefined }">
-          <HeaderSearch />
-          <a-tooltip title="帮助文档" v-if="!isMobile">
-            <a-button type="text" size="small" :icon="h(QuestionCircleOutlined)" />
-          </a-tooltip>
-          <NoticeIcon />
-          <a-tooltip :title="isFullscreen ? '退出全屏' : '全屏'" v-if="!isMobile">
-            <a-button
-              type="text"
-              size="small"
-              :icon="h(isFullscreen ? FullscreenExitOutlined : FullscreenOutlined)"
-              @click="toggleFullscreen"
-            />
+        <!-- Right actions (对标 React: DocLink + LangDropdown + Avatar) -->
+        <div :style="{ display: 'flex', alignItems: 'center', paddingRight: '12px', flexShrink: 0, color: (appStore.layoutMode === 'mix' || appStore.layoutMode === 'top') ? 'rgba(255,255,255,0.85)' : undefined }">
+          <!-- 使用文档 -->
+          <a-tooltip title="使用文档" v-if="!isMobile">
+            <a-button class="header-action-btn" type="text" :icon="h(QuestionCircleOutlined)" @click="router.push('/welcome')" />
           </a-tooltip>
 
+          <!-- 语言切换 -->
+          <a-dropdown v-if="!isMobile" :menu="{ items: localeMenuItems, selectedKeys: [currentLocale], onClick: handleLocaleClick }">
+            <a-button class="header-action-btn" type="text" :icon="h(GlobalOutlined)" />
+          </a-dropdown>
+
           <!-- User -->
-          <a-dropdown>
-            <div style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 0 8px; height: 100%">
-              <a-avatar :size="24" :icon="h(UserOutlined)" />
-              <span v-if="!isMobile" style="font-size: 14px">{{ userStore.realName || 'Admin' }}</span>
+          <a-dropdown :menu="{ items: userMenuItems, onClick: handleUserMenuClick }">
+            <div style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 0 12px; height: 48px; border-radius: 6px" class="header-action-hover">
+              <a-avatar
+                :size="28"
+                :src="userStore.avatar || 'https://gw.alipayobjects.com/zos/rmsportal/BiazfanxmamNRoxxVxka.png'"
+              />
+              <span v-if="!isMobile" style="font-size: 14px">{{ userStore.realName || 'ProUser' }}</span>
             </div>
-            <template #overlay>
-              <a-menu @click="handleUserMenuClick">
-                <a-menu-item key="settings">
-                  <template #icon><SettingOutlined /></template>
-                  个人设置
-                </a-menu-item>
-                <a-menu-divider />
-                <a-menu-item key="logout">
-                  <template #icon><LogoutOutlined /></template>
-                  退出登录
-                </a-menu-item>
-              </a-menu>
-            </template>
           </a-dropdown>
         </div>
       </a-layout-header>
@@ -370,6 +377,22 @@ const LogoBlock = {
 </template>
 
 <style scoped>
+.header-action-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 36px !important;
+  min-width: 36px;
+  padding-inline: 8px !important;
+  padding-block: 0 !important;
+  border-radius: 6px !important;
+  font-size: 16px !important;
+}
+
+.header-action-hover:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
 .sider-collapse-trigger {
   position: absolute;
   top: 50%;
