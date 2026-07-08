@@ -21,6 +21,7 @@ const props = withDefaults(defineProps<{
   collapsed?: boolean
   theme?: 'light' | 'dark'
   mode?: 'inline' | 'horizontal'
+  menuData?: ItemType[]
 }>(), {
   collapsed: false,
   theme: 'light',
@@ -105,12 +106,14 @@ function buildMenuFromRoutes(routes: RouteRecordRaw[], parentPath = ''): ItemTyp
     })
 }
 
-// 从 asyncRoutes 的根路由 children 构建菜单
-const menuItems = computed<ItemType[]>(() => {
+// 从 asyncRoutes 的根路由 children 构建菜单（外部未传入时使用）
+const defaultMenuItems = computed<ItemType[]>(() => {
   const root = asyncRoutes.find((r) => r.path === '/')
   if (!root?.children) return []
   return buildMenuFromRoutes(root.children, '')
 })
+
+const menuItems = computed(() => props.menuData ?? defaultMenuItems.value)
 
 // ── 选中 / 展开 ──
 const selectedKeys = computed(() => [route.path])

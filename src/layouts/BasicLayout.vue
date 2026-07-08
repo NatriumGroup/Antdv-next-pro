@@ -18,6 +18,29 @@ import { useAppStore } from '@/stores/app'
 import { useUserStore } from '@/stores/user'
 import { defaultSettings } from '@/config/defaultSettings'
 import { setLocale, getLocale, type LocaleType } from '@/locales'
+import { asyncRoutes } from '@/router'
+import { usePermission } from '@/composables/usePermission'
+import {
+  DashboardOutlined,
+  FormOutlined,
+  TableOutlined,
+  ProfileOutlined,
+  CheckCircleOutlined,
+  WarningOutlined,
+  SmileOutlined,
+  CrownOutlined,
+  RobotOutlined,
+} from '@antdv-next/icons'
+
+const iconMap: Record<string, any> = {
+  DashboardOutlined, FormOutlined, TableOutlined, ProfileOutlined,
+  CheckCircleOutlined, WarningOutlined, SmileOutlined, CrownOutlined,
+  UserOutlined, RobotOutlined,
+}
+function renderMenuIcon(name?: string) {
+  if (!name || !iconMap[name]) return undefined
+  return () => h(iconMap[name])
+}
 
 const router = useRouter()
 const route = useRoute()
@@ -44,7 +67,7 @@ onUnmounted(() => {
 
 // ── Computed layout helpers ──
 const showSider = computed(() =>
-  !isMobile.value && appStore.layoutMode !== 'top',
+  !isMobile.value && appStore.layoutMode !== 'top' && (appStore.layoutMode !== 'mix' || showMixSider.value),
 )
 
 const showTopMenu = computed(() =>
@@ -59,6 +82,73 @@ const contentMarginLeft = computed(() => {
   if (isMobile.value || appStore.layoutMode === 'top') return '0'
   if (!appStore.fixedSider) return '0'
   return `${siderWidth.value}px`
+})
+
+// ── Mix 模式菜单拆分 ──
+const { hasAuth } = usePermission()
+
+const rootChildren = computed(() => {
+  const root = asyncRoutes.find((r) => r.path === '/')
+  return root?.children?.filter((r) => {
+    if (r.meta?.hideInMenu || !r.meta?.title) return false
+    const authority = r.meta?.authority as string | string[] | undefined
+    if (authority && !hasAuth(authority)) return false
+    return true
+  }) ?? []
+})
+
+// 顶栏一级菜单（只显示一级，不带 children）
+const topMenuItems = computed(() => {
+  if (appStore.layoutMode !== 'mix') return undefined
+  return rootChildren.value.map((r) => ({
+    key: r.path.startsWith('/') ? r.path : `/${r.path}`,
+    icon: renderMenuIcon(r.meta?.icon as string),
+    label: r.meta?.title as string,
+  }))
+})
+
+// 当前激活的一级路由 path
+const activeTopKey = computed(() => {
+  if (route.matched.length >= 2) return route.matched[1].path
+  return ''
+})
+
+// 侧栏：当前一级的子菜单
+const siderMixMenuItems = computed(() => {
+  if (appStore.layoutMode !== 'mix') return undefined
+  const topRoute = rootChildren.value.find((r) => {
+    const p = r.path.startsWith('/') ? r.path : `/${r.path}`
+    return p === activeTopKey.value
+  })
+  if (!topRoute?.children) return []
+  const visible = topRoute.children.filter((c) => {
+    if (c.meta?.hideInMenu || !c.meta?.title) return false
+    const auth = c.meta?.authority as string | string[] | undefined
+    if (auth && !hasAuth(auth)) return false
+    return true
+  })
+  if (visible.length === 0) return []
+  if (visible.length === 1 && visible[0].path === '') return []
+  return visible.map((c) => {
+    const parentPath = activeTopKey.value
+    const fullPath = c.path.startsWith('/') ? c.path : `${parentPath}/${c.path}`
+    const item: any = { key: fullPath, label: c.meta?.title as string }
+    // 三级菜单
+    const subChildren = c.children?.filter((sc) => !sc.meta?.hideInMenu && sc.meta?.title)
+    if (subChildren && subChildren.length > 0 && !(subChildren.length === 1 && subChildren[0].path === '')) {
+      item.children = subChildren.map((sc) => ({
+        key: sc.path.startsWith('/') ? sc.path : `${fullPath}/${sc.path}`,
+        label: sc.meta?.title as string,
+      }))
+    }
+    return item
+  })
+})
+
+// mix 模式侧栏是否有内容
+const showMixSider = computed(() => {
+  if (appStore.layoutMode !== 'mix') return true
+  return siderMixMenuItems.value && siderMixMenuItems.value.length > 0
 })
 
 // ── 面包屑 ──
@@ -193,11 +283,12 @@ const LogoBlock = {
         borderInlineEnd: '1px solid var(--ant-color-border-secondary, #f0f0f0)',
       }"
     >
-      <LogoBlock :collapsed="appStore.sideCollapsed" />
+      <LogoBlock :collapsed="appStore.sideCollapsed" :dark="appStore.darkMode" />
       <SiderMenu
         :collapsed="appStore.sideCollapsed"
         :mode="'inline'"
         :theme="'light'"
+        :menu-data="appStore.layoutMode === 'mix' ? siderMixMenuItems : undefined"
       />
     </a-layout-sider>
 
@@ -262,23 +353,22 @@ const LogoBlock = {
       </div>
       <!-- ============ HEADER ============ -->
       <a-layout-header
+        class="layout-header"
         :style="{
           padding: 0,
-          background: (appStore.layoutMode === 'mix' || appStore.layoutMode === 'top') ? '#001529' : 'var(--ant-color-bg-container)',
-          color: (appStore.layoutMode === 'mix' || appStore.layoutMode === 'top') ? '#fff' : undefined,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
           height: defaultSettings.headerHeight + 'px',
           lineHeight: defaultSettings.headerHeight + 'px',
-          boxShadow: (appStore.fixedHeader && appStore.layoutMode === 'side') ? '0 1px 4px rgba(0, 21, 41, 0.08)' : 'none',
+          boxShadow: '0 1px 4px rgba(0, 21, 41, 0.08)',
           position: appStore.fixedHeader ? 'sticky' : 'relative',
           top: 0,
           zIndex: 10,
         }"
       >
         <!-- Left section -->
-        <div style="display: flex; align-items: center; flex: 1; min-width: 0">
+        <div style="display: flex; align-items: center; flex: 1; min-width: 0; overflow: hidden">
           <!-- 移动端：汉堡菜单 -->
           <div
             v-if="isMobile"
@@ -288,19 +378,21 @@ const LogoBlock = {
             <MenuUnfoldOutlined />
           </div>
 
-          <!-- top / mix 模式 logo -->
-          <LogoBlock v-if="(appStore.layoutMode === 'top' || appStore.layoutMode === 'mix') && !isMobile" :collapsed="false" :dark="true" />
+          <!-- top 模式 logo -->
+          <LogoBlock v-if="appStore.layoutMode === 'top' && !isMobile" :collapsed="false" :dark="appStore.darkMode" />
 
-          <!-- top / mix 模式顶部菜单（深色主题） -->
+          <!-- top / mix 模式顶部菜单 -->
           <SiderMenu
             v-if="showTopMenu"
             :mode="'horizontal'"
-            :theme="'dark'"
+            :theme="'light'"
+            :menu-data="topMenuItems"
+            :style="appStore.layoutMode === 'mix' ? { marginLeft: '16px' } : undefined"
           />
         </div>
 
-        <!-- Right actions (对标 React: DocLink + LangDropdown + Avatar) -->
-        <div :style="{ display: 'flex', alignItems: 'center', paddingRight: '12px', flexShrink: 0, color: (appStore.layoutMode === 'mix' || appStore.layoutMode === 'top') ? 'rgba(255,255,255,0.85)' : undefined }">
+        <!-- Right actions -->
+        <div :style="{ display: 'flex', alignItems: 'center', paddingRight: '12px', flexShrink: 0 }">
           <!-- 使用文档 -->
           <a-tooltip title="使用文档" v-if="!isMobile">
             <a-button class="header-action-btn" type="text" :icon="h(QuestionCircleOutlined)" @click="router.push('/welcome')" />
@@ -377,6 +469,10 @@ const LogoBlock = {
 </template>
 
 <style scoped>
+.layout-header {
+  background: var(--ant-color-bg-container, #fff) !important;
+}
+
 .header-action-btn {
   display: inline-flex !important;
   align-items: center !important;

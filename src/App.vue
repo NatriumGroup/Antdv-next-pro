@@ -27,6 +27,18 @@ const themeConfig = computed(() => {
       borderRadius: 6,
       fontFamily: 'AlibabaSans, sans-serif',
     },
+    components: {
+      Menu: appStore.darkMode
+        ? {
+            itemSelectedBg: appStore.primaryColor,
+            itemSelectedColor: '#fff',
+            subMenuItemSelectedColor: '#fff',
+          }
+        : {
+            itemSelectedBg: '#e6f4ff',
+            itemSelectedColor: appStore.primaryColor,
+          },
+    },
     algorithm: algorithms,
     zeroRuntime: true,
   }

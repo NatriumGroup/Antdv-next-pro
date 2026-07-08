@@ -528,9 +528,9 @@ const searchColumns = [
             <a-row :gutter="8" style="width: 138px; margin: 8px 0">
               <a-col :span="12">
                 <div class="number-info">
-                  <span class="number-info-subtitle" :style="{ color: offlineActiveKey === shop.name ? undefined : 'rgba(0,0,0,0.45)' }">{{ shop.name }}</span>
-                  <div style="color: rgba(0,0,0,0.45); font-size: 12px; margin: 2px 0">转化率</div>
-                  <div class="number-total" :style="{ color: offlineActiveKey === shop.name ? undefined : 'rgba(0,0,0,0.45)' }">
+                  <span class="number-info-subtitle" :style="{ opacity: offlineActiveKey === shop.name ? 1 : 0.45 }">{{ shop.name }}</span>
+                  <div style="color: var(--ant-color-text-tertiary); font-size: 12px; margin: 2px 0">转化率</div>
+                  <div class="number-total" :style="{ opacity: offlineActiveKey === shop.name ? 1 : 0.45 }">
                     {{ (shop.cvr * 100).toFixed(0) }}%
                   </div>
                 </div>
@@ -561,12 +561,12 @@ const searchColumns = [
 .chart-card { position: relative; }
 .chart-top { position: relative; width: 100%; overflow: hidden; }
 .meta-wrap { float: left; }
-.meta { height: 22px; color: rgba(0,0,0,0.45); font-size: 14px; line-height: 22px; }
+.meta { height: 22px; color: var(--ant-color-text-tertiary); font-size: 14px; line-height: 22px; }
 .meta-title {}
 .meta-action { position: absolute; top: 4px; right: 0; line-height: 1; cursor: pointer; }
 .total {
   height: 38px; margin-top: 4px; margin-bottom: 0;
-  overflow: hidden; color: rgba(0,0,0,0.88);
+  overflow: hidden; color: var(--ant-color-text);
   font-size: 30px; line-height: 38px;
   white-space: nowrap; text-overflow: ellipsis; word-break: break-all;
 }
@@ -578,18 +578,18 @@ const searchColumns = [
 }
 .card-footer > * { position: relative; }
 .field-label { font-size: 14px; line-height: 22px; }
-.field-value { margin-left: 8px; color: rgba(0,0,0,0.88); }
+.field-value { margin-left: 8px; color: var(--ant-color-text); }
 
 /* ═══ Trend ═══ */
 .trend-item { display: inline-block; font-size: 14px; line-height: 22px; }
-.trend-text { margin-left: 8px; color: rgba(0,0,0,0.88); }
+.trend-text { margin-left: 8px; color: var(--ant-color-text); }
 .trend-up { color: #ff4d4f; }
 .trend-down { color: #52c41a; }
 
 /* ═══ SalesCard ═══ */
 .sales-extra-wrap { display: flex; align-items: center; padding-right: 24px; }
 .sales-extra { display: inline-block; margin-right: 24px; }
-.sales-extra :deep(.ant-btn) { color: rgba(0,0,0,0.88); }
+.sales-extra :deep(.ant-btn) { color: var(--ant-color-text); }
 .sales-extra :deep(.ant-btn:hover) { color: var(--ant-color-primary); }
 .current-date { color: var(--ant-color-primary) !important; font-weight: bold; }
 .sales-bar { padding: 0 0 32px 32px; }
@@ -602,18 +602,18 @@ const searchColumns = [
   margin-top: 1.5px; margin-right: 16px;
   font-weight: 600; font-size: 12px; line-height: 20px;
   text-align: center; border-radius: 20px;
-  background-color: rgba(0,0,0,0.04);
+  background-color: var(--ant-color-fill-tertiary, rgba(0,0,0,0.04));
 }
-.ranking-item-number.active { color: #fff; background-color: rgba(0,0,0,0.85); }
+.ranking-item-number.active { color: #fff; background-color: var(--ant-color-text); }
 .ranking-item-title { flex: 1; margin-right: 8px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 
 /* ═══ TopSearch ═══ */
-.icon-group { cursor: pointer; color: rgba(0,0,0,0.45); transition: color 0.32s; }
-.icon-group:hover { color: rgba(0,0,0,0.88); }
+.icon-group { cursor: pointer; color: var(--ant-color-text-tertiary); transition: color 0.32s; }
+.icon-group:hover { color: var(--ant-color-text); }
 .number-info {}
-.number-info-subtitle { font-size: 14px; line-height: 22px; color: rgba(0,0,0,0.45); }
+.number-info-subtitle { font-size: 14px; line-height: 22px; color: var(--ant-color-text-tertiary); }
 .number-info-value { display: flex; align-items: baseline; gap: 8px; margin-top: 4px; }
-.number-total { font-size: 24px; font-weight: 600; color: rgba(0,0,0,0.88); }
+.number-total { font-size: 24px; font-weight: 600; color: var(--ant-color-text); }
 .number-sub { font-size: 16px; }
 
 /* ═══ ProportionSales ═══ */
