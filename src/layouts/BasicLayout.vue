@@ -14,11 +14,12 @@ import {
 } from '@antdv-next/icons'
 import SiderMenu from '@/components/SiderMenu.vue'
 import TabBar from '@/components/TabBar.vue'
+import PageLoading from '@/components/PageLoading.vue'
 import { useAppStore } from '@/stores/app'
 import { useUserStore } from '@/stores/user'
 import { defaultSettings } from '@/config/defaultSettings'
 import { setLocale, getLocale, type LocaleType } from '@/locales'
-import { asyncRoutes } from '@/router'
+import { asyncRoutes, router as appRouter } from '@/router'
 import { usePermission } from '@/composables/usePermission'
 import {
   DashboardOutlined,
@@ -46,6 +47,25 @@ const router = useRouter()
 const route = useRoute()
 const appStore = useAppStore()
 const userStore = useUserStore()
+
+// ── 路由加载骨架屏 ──
+const routeLoading = ref(false)
+let removeBeforeEach: (() => void) | null = null
+let removeAfterEach: (() => void) | null = null
+
+onMounted(() => {
+  removeBeforeEach = appRouter.beforeEach(() => {
+    routeLoading.value = true
+  })
+  removeAfterEach = appRouter.afterEach(() => {
+    routeLoading.value = false
+  })
+})
+
+onUnmounted(() => {
+  removeBeforeEach?.()
+  removeAfterEach?.()
+})
 
 // ── 响应式 ──
 const isMobile = ref(false)
@@ -443,7 +463,8 @@ const LogoBlock = {
           minHeight: 'calc(100vh - 56px - 70px)',
         }"
       >
-        <router-view v-slot="{ Component, route: viewRoute }">
+        <PageLoading v-if="routeLoading" />
+        <router-view v-else v-slot="{ Component, route: viewRoute }">
           <transition name="slide-fade" mode="out-in">
             <keep-alive>
               <component :is="Component" :key="viewRoute.path" />

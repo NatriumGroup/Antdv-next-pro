@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { GlobalOutlined } from '@antdv-next/icons'
+import PageLoading from '@/components/PageLoading.vue'
 </script>
 
 <template>
