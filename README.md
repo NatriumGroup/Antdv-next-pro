@@ -37,6 +37,10 @@ An out-of-the-box admin template based on [Antdv Next](https://www.antdv-next.co
 
 </div>
 
+## Preview
+![preview1](./.assets/preview1.png)
+![preview2](./.assets/preview2.png)
+
 ## Features
 
 - **TypeScript** — Full type safety across the entire codebase

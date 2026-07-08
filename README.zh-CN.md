@@ -37,6 +37,10 @@
 
 </div>
 
+## 预览
+![预览1](./.assets/preview1.png)
+![预览2](./.assets/preview2.png)
+
 ## 特性
 
 - **TypeScript** — 全量类型安全，覆盖整个代码库
